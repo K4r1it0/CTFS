@@ -1,0 +1,37 @@
+FROM ubuntu:latest AS app
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt update
+RUN apt install apache2 -y
+RUN apt install php -y
+RUN apt install libapache2-mod-php -y
+RUN apt install php-curl -y
+RUN apt install zip -y
+RUN apt install python3 -y
+RUN apt install python3-pip -y
+RUN pip3 install flask
+RUN apt install cron -y
+RUN apt install curl
+RUN pip3 install selenium
+RUN apt install wget -y
+WORKDIR "/var/www/"
+RUN wget https://www.slimjet.com/chrome/download-chrome.php?file=files%2F90.0.4430.72%2Fgoogle-chrome-stable_current_amd64.deb -O chrome.deb
+RUN apt install ./chrome.deb -y
+RUN dpkg -i ./chrome.deb
+RUN wget https://chromedriver.storage.googleapis.com/90.0.4430.24/chromedriver_linux64.zip -O chromedriver_linux64.zip
+RUN unzip chromedriver_linux64.zip
+COPY cronit /etc/cron.d/cronit
+RUN chmod 0644 /etc/cron.d/cronit
+RUN crontab /etc/cron.d/cronit
+COPY ctf.zip /var/www/html/
+COPY bot.py /var/www/
+COPY cache.sh /var/www/
+COPY apache.txt /var/www/
+COPY start.sh /var/www/
+COPY cron.sh /var/www/
+RUN chmod +x /var/www/cron.sh
+RUN chmod +x /var/www/cache.sh
+RUN unzip /var/www/html/ctf.zip
+RUN rm /var/www/html/ctf.zip
+RUN cp apache.txt /var/www/html/OhS.O.P/uploads/htaccess.bak
+EXPOSE 80
+CMD ["/bin/sh", "/var/www/start.sh"]
